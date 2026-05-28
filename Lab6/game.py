@@ -52,7 +52,6 @@ class GomokuGame:
         return self._get_state(), 0, False, {}
 
     def _check_win(self, row, col):
-        """Проверяет, есть ли 5 в ряд вокруг последнего поставленного камня."""
         player = self.board[row, col]
         if player == 0:
             return False
@@ -84,7 +83,6 @@ class GomokuGame:
         return False
 
     def render(self):
-        """Выводит доску в консоль для визуального контроля (полезно при отладке)."""
         symbols = {0: '.', 1: 'X', -1: 'O'}
         print('  ' + ' '.join(str(i % 10) for i in range(self.board_size)))
         for r in range(self.board_size):
