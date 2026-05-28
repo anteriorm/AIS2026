@@ -10,13 +10,11 @@ class StrongQLearningAgent:
         self.epsilon = epsilon
         self.alpha = alpha
         self.gamma = gamma
-        # 7 признаков: свои длины 2,3,4 + чужие длины 2,3,4 + центральность
         self.weights = np.random.randn(7) * 0.01
         self.prev_features = None
 
     def _count_lines_global(self, board, player):
-        """Возвращает количество линий длины 2,3,4 для игрока на всей доске."""
-        counts = [0.0, 0.0, 0.0]  # 2,3,4
+        counts = [0.0, 0.0, 0.0]
         directions = [(1,0), (0,1), (1,1), (1,-1)]
         for r in range(self.board_size):
             for c in range(self.board_size):
@@ -24,18 +22,15 @@ class StrongQLearningAgent:
                     continue
                 for dr, dc in directions:
                     length = 1
-                    # считаем в положительном направлении
                     for step in range(1, self.win_length):
                         nr, nc = r + dr*step, c + dc*step
                         if 0 <= nr < self.board_size and 0 <= nc < self.board_size and board[nr, nc] == player:
                             length += 1
                         else:
                             break
-                    # если длина >=2, добавляем вклады
                     for l in [2,3,4]:
                         if length >= l:
                             counts[l-2] += 1
-        # Нормализация (максимум – очень грубо, но чтобы признаки не росли бесконечно)
         max_count = self.board_size * self.board_size * 4
         counts = [c / max_count for c in counts]
         return counts
@@ -48,7 +43,6 @@ class StrongQLearningAgent:
         my_counts = self._count_lines_global(board, player)
         opp_counts = self._count_lines_global(board, -player)
         feats = my_counts + opp_counts
-        # Центральность
         center = self.board_size // 2
         dist = abs(r - center) + abs(c - center)
         centrality = 1.0 - dist / (self.board_size * 2)
@@ -83,9 +77,9 @@ class StrongQLearningAgent:
         else:
             target = reward
         q_prev = np.dot(self.weights, self.prev_features)
-        error = np.clip(target - q_prev, -1.0, 1.0)   # ограничиваем ошибку
+        error = np.clip(target - q_prev, -1.0, 1.0)
         self.weights += self.alpha * error * self.prev_features
-        self.weights = np.clip(self.weights, -1.0, 1.0)  # ограничиваем веса
+        self.weights = np.clip(self.weights, -1.0, 1.0)
 
     def set_prev(self, state, action, player):
         self.prev_features = self.extract_features(state, action, player)
